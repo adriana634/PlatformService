@@ -5,11 +5,23 @@ namespace PlatformService.Data
 {
     public class AppDbContext : DbContext
     {
+        private readonly IConfiguration configuration;
+
         public DbSet<Platform> Platforms => Set<Platform>();
 
+        public AppDbContext(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder
-                .UseInMemoryDatabase("PlatformService");
+        {
+            Console.WriteLine("--> Using SQL Server database");
+
+            string connectionString = this.configuration.GetConnectionString("Platforms");
+            optionsBuilder
+                .UseSqlServer(connectionString);
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
