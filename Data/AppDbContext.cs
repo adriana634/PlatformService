@@ -19,8 +19,7 @@ namespace PlatformService.Data
             Console.WriteLine("--> Using SQL Server database");
 
             string connectionString = this.configuration.GetConnectionString("Platforms");
-            optionsBuilder
-                .UseSqlServer(connectionString);
+            optionsBuilder.UseSqlServer(connectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

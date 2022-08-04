@@ -41,7 +41,7 @@ namespace PlatformService.Controllers
             if (platform == null) return NotFound();
 
             PlatformReadDto result = this.mapper.Map<PlatformReadDto>(platform);
-            return result;
+            return Ok(result);
         }
 
         [HttpPost]
