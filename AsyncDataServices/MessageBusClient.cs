@@ -16,23 +16,23 @@ namespace PlatformService.AsyncDataServices
         {
             this.configuration = configuration.Value;
 
-            ConnectionFactory factory = new ConnectionFactory()
+            var factory = new ConnectionFactory()
             {
                 HostName = this.configuration.Host,
                 Port = this.configuration.Port
             };
 
-            this.connection = null!;
-            this.channel = null!;
+            connection = null!;
+            channel = null!;
 
             try
             {
-                this.connection = factory.CreateConnection();
-                this.channel = this.connection.CreateModel();
+                connection = factory.CreateConnection();
+                channel = connection.CreateModel();
 
-                this.channel.ExchangeDeclare(exchange: "trigger", type: ExchangeType.Fanout);
+                channel.ExchangeDeclare(exchange: "trigger", type: ExchangeType.Fanout);
 
-                this.connection.ConnectionShutdown += MessageBusClient.RabbitMQ_ConnectionShutDown;
+                connection.ConnectionShutdown += MessageBusClient.RabbitMQ_ConnectionShutDown;
 
                 Console.WriteLine("--> Connected to MessageBus");
             }
@@ -45,17 +45,17 @@ namespace PlatformService.AsyncDataServices
 
         public void Dispose()
         {
-            if (this.connection != null && this.channel != null)
+            if (connection != null && channel != null)
             {
-                if (this.channel.IsOpen)
+                if (channel.IsOpen)
                 {
-                    this.channel.Close();
-                    this.connection.Close();
+                    channel.Close();
+                    connection.Close();
 
-                    this.connection.ConnectionShutdown -= MessageBusClient.RabbitMQ_ConnectionShutDown;
+                    connection.ConnectionShutdown -= MessageBusClient.RabbitMQ_ConnectionShutDown;
 
-                    this.channel.Dispose();
-                    this.connection.Dispose();
+                    channel.Dispose();
+                    connection.Dispose();
 
                     Console.WriteLine("MessageBus disposed");
                 }
@@ -64,9 +64,9 @@ namespace PlatformService.AsyncDataServices
 
         private void SendMessage(string message)
         {
-            byte[] body = Encoding.UTF8.GetBytes(message);
+            var body = Encoding.UTF8.GetBytes(message);
 
-            this.channel.BasicPublish(
+            channel.BasicPublish(
                 exchange: "trigger",
                 routingKey: "",
                 basicProperties: null,
@@ -77,12 +77,12 @@ namespace PlatformService.AsyncDataServices
 
         public void PublishNewPlatform(PlatformPublishedDto platformPublishedDto)
         {
-            string message = JsonSerializer.Serialize(platformPublishedDto);
+            var message = JsonSerializer.Serialize(platformPublishedDto);
 
-            if (this.connection.IsOpen)
+            if (connection.IsOpen)
             {
                 Console.WriteLine("--> RabbitMQ Connection Open, sending message...");
-                this.SendMessage(message);
+                SendMessage(message);
             }
             else
             {

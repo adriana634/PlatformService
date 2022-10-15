@@ -2,7 +2,7 @@ using PlatformService.AsyncDataServices;
 using PlatformService.Data;
 using PlatformService.SyncDataServices.Http;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
@@ -23,7 +23,7 @@ builder.Services.AddSwaggerGen();
 
 Console.WriteLine($"---> CommandService Endpoint {builder.Configuration["CommandService"]}");
 
-WebApplication app = builder.Build();
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

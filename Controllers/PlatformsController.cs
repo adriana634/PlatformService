@@ -32,36 +32,36 @@ namespace PlatformService.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<PlatformReadDto>> GetPlatforms()
         {
-            IEnumerable<Platform> platforms = this.platformRepo.GetAllPlatforms();
+            var platforms = platformRepo.GetAllPlatforms();
 
-            IEnumerable<PlatformReadDto> result = this.mapper.Map<IEnumerable<PlatformReadDto>>(platforms);
+            var result = mapper.Map<IEnumerable<PlatformReadDto>>(platforms);
             return Ok(result);
         }
 
         [HttpGet("{id}", Name = "GetPlatformById")]
         public ActionResult<PlatformReadDto> GetPlatformById(int id)
         {
-            Platform? platform = this.platformRepo.GetPlatformById(id);
+            var platform = platformRepo.GetPlatformById(id);
             if (platform == null) return NotFound();
 
-            PlatformReadDto result = this.mapper.Map<PlatformReadDto>(platform);
+            var result = mapper.Map<PlatformReadDto>(platform);
             return Ok(result);
         }
 
         [HttpPost]
         public async Task<ActionResult<PlatformReadDto>> CreatePlatform(PlatformCreateDto platformCreateDto)
         {
-            Platform platformModel = this.mapper.Map<Platform>(platformCreateDto);
+            var platformModel = mapper.Map<Platform>(platformCreateDto);
 
-            this.platformRepo.CreatePlatform(platformModel);
-            this.platformRepo.SaveChanges();
+            platformRepo.CreatePlatform(platformModel);
+            platformRepo.SaveChanges();
 
-            PlatformReadDto platformReadDto = this.mapper.Map<PlatformReadDto>(platformModel);
+            var platformReadDto = mapper.Map<PlatformReadDto>(platformModel);
 
             // Send Sync Message
             try
             {
-                await this.commandDataClient.SendPlatformToCommand(platformReadDto);
+                await commandDataClient.SendPlatformToCommand(platformReadDto);
             }
             catch (Exception ex)
             {
@@ -71,10 +71,10 @@ namespace PlatformService.Controllers
             // Send Async Message
             try
             {
-                PlatformPublishedDto platformPublishedDto = this.mapper.Map<PlatformPublishedDto>(platformReadDto);
+                var platformPublishedDto = mapper.Map<PlatformPublishedDto>(platformReadDto);
                 platformPublishedDto.Event = "Platform_Published";
 
-                this.messageBusClient.PublishNewPlatform(platformPublishedDto);
+                messageBusClient.PublishNewPlatform(platformPublishedDto);
             }
             catch (Exception ex)
             {

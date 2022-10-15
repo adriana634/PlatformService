@@ -5,9 +5,9 @@ namespace PlatformService.Data
 {
     public class AppDbContext : DbContext
     {
-        private readonly IConfiguration configuration;
+        public DbSet<Platform> Platforms { get; set; }
 
-        public DbSet<Platform> Platforms => Set<Platform>();
+        private readonly IConfiguration configuration;
 
         public AppDbContext(IConfiguration configuration)
         {
@@ -18,7 +18,7 @@ namespace PlatformService.Data
         {
             Console.WriteLine("--> Using SQL Server database");
 
-            string connectionString = this.configuration.GetConnectionString("Platforms");
+            var connectionString = configuration.GetConnectionString("Platforms");
             optionsBuilder.UseSqlServer(connectionString);
         }
 
