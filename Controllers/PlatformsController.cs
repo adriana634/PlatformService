@@ -16,17 +16,19 @@ namespace PlatformService.Controllers
         private readonly IMapper mapper;
         private readonly ICommandDataClient commandDataClient;
         private readonly IMessageBusClient messageBusClient;
+        private readonly ILogger<PlatformsController> logger;
 
-        public PlatformsController(
-            IPlatformRepo platformRepo, 
-            IMapper mapper,
-            ICommandDataClient commandDataClient,
-            IMessageBusClient messageBusClient)
+        public PlatformsController(IPlatformRepo platformRepo,
+                                   IMapper mapper,
+                                   ICommandDataClient commandDataClient,
+                                   IMessageBusClient messageBusClient,
+                                   ILogger<PlatformsController> logger)
         {
             this.platformRepo = platformRepo;
             this.mapper = mapper;
             this.commandDataClient = commandDataClient;
             this.messageBusClient = messageBusClient;
+            this.logger = logger;
         }
 
         [HttpGet]
@@ -65,7 +67,7 @@ namespace PlatformService.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"--> Could not send synchronously: {ex.Message}");
+                logger.LogError("Could not send synchronously: {ExceptionMessage}", ex.Message);
             }
 
             // Send Async Message
@@ -78,7 +80,7 @@ namespace PlatformService.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"--> Could not send asynchronously: {ex.Message}");
+                logger.LogError("Could not send asynchronously: {ExceptionMessage}", ex.Message);
             }
 
             return CreatedAtRoute(nameof(GetPlatformById), new { Id = platformReadDto.Id }, platformReadDto);

@@ -8,15 +8,17 @@ namespace PlatformService.Data
         public DbSet<Platform> Platforms { get; set; }
 
         private readonly IConfiguration configuration;
+        private readonly ILogger<AppDbContext> logger;
 
-        public AppDbContext(IConfiguration configuration)
+        public AppDbContext(IConfiguration configuration, ILogger<AppDbContext> logger)
         {
             this.configuration = configuration;
+            this.logger = logger;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            Console.WriteLine("--> Using SQL Server database");
+            logger.LogInformation("Using SQL Server database");
 
             var connectionString = configuration.GetConnectionString("Platforms");
             optionsBuilder.UseSqlServer(connectionString);

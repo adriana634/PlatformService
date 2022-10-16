@@ -8,11 +8,15 @@ namespace PlatformService.SyncDataServices.Http
     {
         private readonly HttpClient httpClient;
         private readonly IConfiguration configuration;
+        private readonly ILogger<HttpCommandDataClient> logger;
 
-        public HttpCommandDataClient(HttpClient httpClient, IConfiguration configuration)
+        public HttpCommandDataClient(HttpClient httpClient,
+                                     IConfiguration configuration,
+                                     ILogger<HttpCommandDataClient> logger)
         {
             this.httpClient = httpClient;
             this.configuration = configuration;
+            this.logger = logger;
         }
 
         public async Task SendPlatformToCommand(PlatformReadDto platform)
@@ -27,11 +31,11 @@ namespace PlatformService.SyncDataServices.Http
 
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine("--> Sync POST to CommandService was OK!");
+                logger.LogInformation("Sync POST to CommandService was OK!");
             }
             else
             {
-                Console.WriteLine("--> Sync POST to CommandService was NOT OK!");
+                logger.LogInformation("Sync POST to CommandService was NOT OK!");
             }
         }
     }

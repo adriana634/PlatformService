@@ -21,9 +21,9 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-Console.WriteLine($"---> CommandService Endpoint {builder.Configuration["CommandService"]}");
-
 var app = builder.Build();
+
+app.Logger.LogInformation("Command Service Endpoint: {CommandServiceEndpoint}", builder.Configuration["CommandService"]);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -1,6 +1,9 @@
-public class RabbitMQOptions
+namespace PlatformService.AsyncDataServices
 {
-    public const string RabbitMQ = "RabbitMQ";
-    public string Host { get; set; } = default!;
-    public int Port { get; set; }
+    public class RabbitMQOptions
+    {
+        public const string RabbitMQ = "RabbitMQ";
+        public string Host { get; set; }
+        public int Port { get; set; }
+    }
 }

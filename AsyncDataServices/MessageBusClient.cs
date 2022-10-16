@@ -9,21 +9,21 @@ namespace PlatformService.AsyncDataServices
     public class MessageBusClient : IMessageBusClient, IDisposable
     {
         private readonly RabbitMQOptions configuration;
-        private readonly IConnection connection;
-        private readonly IModel channel;
+        private readonly ILogger<MessageBusClient> logger;
 
-        public MessageBusClient(IOptions<RabbitMQOptions> configuration)
+        private readonly IConnection? connection = null;
+        private readonly IModel? channel = null;
+
+        public MessageBusClient(IOptions<RabbitMQOptions> configuration, ILogger<MessageBusClient> logger)
         {
             this.configuration = configuration.Value;
+            this.logger = logger;
 
             var factory = new ConnectionFactory()
             {
                 HostName = this.configuration.Host,
                 Port = this.configuration.Port
             };
-
-            connection = null!;
-            channel = null!;
 
             try
             {
@@ -32,33 +32,14 @@ namespace PlatformService.AsyncDataServices
 
                 channel.ExchangeDeclare(exchange: "trigger", type: ExchangeType.Fanout);
 
-                connection.ConnectionShutdown += MessageBusClient.RabbitMQ_ConnectionShutDown;
+                connection.ConnectionShutdown += RabbitMQ_ConnectionShutDown;
 
-                Console.WriteLine("--> Connected to MessageBus");
+                this.logger.LogInformation("Connected to Message Bus");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"--> Could not connect to the Message Bus: {ex.Message}");
+                this.logger.LogError("Could not connect to the Message Bus: {ExceptionMessage}", ex.Message);
                 throw;
-            }
-        }
-
-        public void Dispose()
-        {
-            if (connection != null && channel != null)
-            {
-                if (channel.IsOpen)
-                {
-                    channel.Close();
-                    connection.Close();
-
-                    connection.ConnectionShutdown -= MessageBusClient.RabbitMQ_ConnectionShutDown;
-
-                    channel.Dispose();
-                    connection.Dispose();
-
-                    Console.WriteLine("MessageBus disposed");
-                }
             }
         }
 
@@ -72,27 +53,46 @@ namespace PlatformService.AsyncDataServices
                 basicProperties: null,
                 body: body
             );
-            Console.WriteLine($"--> Message sent: {message}");
+            logger.LogInformation("Message sent: {Message}", message);
         }
 
         public void PublishNewPlatform(PlatformPublishedDto platformPublishedDto)
         {
             var message = JsonSerializer.Serialize(platformPublishedDto);
 
-            if (connection.IsOpen)
+            if (connection!.IsOpen)
             {
-                Console.WriteLine("--> RabbitMQ Connection Open, sending message...");
+                logger.LogInformation("RabbitMQ Connection Open, sending message...");
                 SendMessage(message);
             }
             else
             {
-                Console.WriteLine("--> RabbitMQ Connection is closed, not sending");
+                logger.LogInformation("RabbitMQ Connection is closed, not sending");
             }
         }
 
-        private static void RabbitMQ_ConnectionShutDown(object? sender, ShutdownEventArgs e)
+        private void RabbitMQ_ConnectionShutDown(object? sender, ShutdownEventArgs e)
         {
-            Console.WriteLine("--> RabbitMQ Connection Shutdown");
+            logger.LogInformation("Message Bus connection Shutdown");
+        }
+
+        public void Dispose()
+        {
+            if (connection is not null && channel is not null)
+            {
+                if (channel.IsOpen)
+                {
+                    channel.Close();
+                    connection.Close();
+
+                    connection.ConnectionShutdown -= RabbitMQ_ConnectionShutDown;
+
+                    channel.Dispose();
+                    connection.Dispose();
+
+                    logger.LogInformation("MessageBus disposed");
+                }
+            }
         }
     }
 }
